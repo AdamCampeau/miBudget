@@ -18,7 +18,7 @@ const FILES_TO_CACHE = [
     './icons/icon-512x512.png',
 ];
 
-//install cache
+//install 
 self.addEventListener('install',function(e){
     e.waitUntil(
         caches.open(CACHE_NAME).then(function (cache) {
@@ -29,11 +29,35 @@ self.addEventListener('install',function(e){
 
 });
 
-//activate cache
+//delete
 self.addEventListener('activate', function(e) {
     e.waitUntil(
-        caches.keys().then()
+        caches.keys().then(function (keys) {
+            let cachedList = keys.filter(function (key) {
+                return key.indexOd(APP_PREFIX);
+            })
+            cachedList.push(CACHE_NAME)
+            return Promise.all(keys).map(function (key,i) {
+                if (cachedList.indesOf(key) === -1) {
+                    console.log('Deleting' + keys[i])
+                return caches.delete(keys[i])    
+                }
+            })
+        })
     )
 })
 
-//fetch with cache response
+//fetch 
+self.addEventListener('fetch',function (e) {
+    e.respondingWith(
+        cahces.match(e.request).then(function (request) {
+            if (request) {
+                console.log(e.request.url)
+                return request
+            } else {
+                console.log( 'fetching' + e.request.url)
+                return fetch(e.request)
+            }
+        })
+    )
+})
